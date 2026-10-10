@@ -1,0 +1,102 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: mechanic-shop-billing
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/billing-db}
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        # A command that keeps failing is retried in memory and then rejected without requeue,
+        # which routes it to the dead-letter queue declared in RabbitTopologyConfig.
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-retries: 3
+          initial-interval: 1s
+          multiplier: 2
+
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:billing@mechanic-shop.local}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db
+  health:
+    # E-mail is an asynchronous, non-critical side effect; a broker outage is absorbed by the
+    # outbox. Neither should take the pod out of rotation.
+    mail:
+      enabled: false
+    rabbit:
+      enabled: false
+
+springdoc:
+  api-docs:
+    path: /api/billing/v3/api-docs
+  swagger-ui:
+    path: /api/billing/swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET:local-dev-jwt-secret-change-me}
+      issuer: ${JWT_ISSUER:mechanic-shop-api}
+
+app:
+  # Public base URL (the Kong gateway) used to build the links sent to customers.
+  base-url: ${APP_BASE_URL:http://localhost:8000}
+  outbox:
+    poll-interval-ms: ${OUTBOX_POLL_INTERVAL_MS:1000}
+    batch-size: 50
+
+billing:
+  payment:
+    # simulated | mercadopago
+    provider: ${PAYMENT_PROVIDER:simulated}
+    mercadopago:
+      access-token: ${MERCADOPAGO_ACCESS_TOKEN:}
+      webhook-secret: ${MERCADOPAGO_WEBHOOK_SECRET:}
+      api-base-url: ${MERCADOPAGO_API_BASE_URL:https://api.mercadopago.com}
+      notification-url: ${MERCADOPAGO_NOTIFICATION_URL:${app.base-url}/api/billing/webhooks/mercadopago}

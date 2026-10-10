@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:billing-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  rabbitmq:
+    listener:
+      simple:
+        # No broker in tests: commands are delivered straight to the handler.
+        auto-startup: false
+
+app:
+  outbox:
+    # The relay is exercised on demand; it must not race the assertions.
+    poll-interval-ms: 3600000
