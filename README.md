@@ -129,7 +129,18 @@ Para subir os três serviços juntos, use o `docker-compose.full.yaml` do reposi
 - Testes unitários de domínio, casos de uso, controllers, segurança e infraestrutura.
 - BDD em `src/test/resources/features/orcamento_e_pagamento.feature` (8 cenários, do orçamento ao estorno).
 - Teste da aplicação inteira com banco em memória (transações, outbox e segurança).
-- O build falha se a cobertura de linhas ficar abaixo de 80%. Medição em 10/10/2026: **110 testes, 99,0% de linhas** (`target/site/jacoco/index.html`).
+- O build falha se a cobertura de linhas ficar abaixo de 80%.
+
+### Evidência de cobertura
+
+Medição de 09/11/2026 (`./mvnw verify`, todos os testes passando):
+
+| Testes | Linhas | Condições | Cobertura no SonarCloud (linhas + condições) |
+|---|---|---|---|
+| 143 | 98,9% | 89,2% | **96,9%** |
+
+- Relatório JaCoCo local: `target/site/jacoco/index.html`.
+- No CI, todo PR e todo push publica o relatório como artefato `coverage-report` do workflow e envia a cobertura ao SonarCloud, cujo quality gate precisa passar: [painel do projeto](https://sonarcloud.io/summary/overall?id=EddieMarley23_mechanic-shop-billing-service).
 
 ## CI/CD
 
