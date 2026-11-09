@@ -125,20 +125,7 @@ class InfrastructureTest {
 			);
 		}
 
-		@Test
-		void shouldFailEveryOperationUntilItIsImplemented() {
-			var gateway = gateway("TEST-token");
-			var charge = new ChargeRequest(UUID.randomUUID(), UUID.randomUUID(), BigDecimal.TEN, "OS", "Cliente", "c@t.com");
-
-			assertThat(gateway.provider()).isEqualTo(PaymentProviderEnum.MERCADO_PAGO);
-			assertThatThrownBy(() -> gateway.createCharge(charge))
-				.isInstanceOf(PaymentGatewayException.class)
-				.hasMessageContaining("not implemented");
-			assertThatThrownBy(() -> gateway.parseNotification(Map.of(), Map.of(), "{}")).isInstanceOf(
-				PaymentGatewayException.class
-			);
-			assertThatThrownBy(() -> gateway.refund("1", BigDecimal.TEN, "k")).isInstanceOf(PaymentGatewayException.class);
-		}
+		// Behavior against the Mercado Pago API: see MercadoPagoPaymentGatewayTest.
 
 		@Test
 		void shouldKnowWhetherItsCredentialsAreConfigured() {

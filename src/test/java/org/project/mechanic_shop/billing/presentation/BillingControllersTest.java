@@ -384,6 +384,20 @@ class BillingControllersTest {
 		}
 
 		@Test
+		void shouldAnswerUnauthorizedToAForgedSignature() throws Exception {
+			when(paymentGateway.parseNotification(anyMap(), anyMap(), any())).thenThrow(
+				new org.project.mechanic_shop.billing.application.ports.payment.InvalidWebhookSignatureException("Invalid x-signature.")
+			);
+
+			mockMvc
+				.perform(post("/api/billing/webhooks/mercadopago").content("{}").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.message").value("Invalid x-signature."));
+
+			verify(paymentService, never()).applyNotification(any());
+		}
+
+		@Test
 		void shouldRefuseANotificationTheGatewayAdapterCannotVerify() throws Exception {
 			when(paymentGateway.parseNotification(anyMap(), anyMap(), any())).thenThrow(
 				new PaymentGatewayException("Invalid signature")
