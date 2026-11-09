@@ -3,6 +3,7 @@ package org.project.mechanic_shop.billing.presentation.middlewares;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.project.mechanic_shop.billing.application.ports.payment.InvalidWebhookSignatureException;
 import org.project.mechanic_shop.billing.application.ports.payment.PaymentGatewayException;
 import org.project.mechanic_shop.billing.domain.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,13 @@ public class GlobalExceptionHandler {
 	public ErrorResponse handleIllegalStateException(IllegalStateException e) {
 		log.warn("Business rule violation: {}", e.getMessage());
 		return ErrorResponse.of(HttpStatus.CONFLICT.value(), e.getMessage());
+	}
+
+	@ExceptionHandler(InvalidWebhookSignatureException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ErrorResponse handleInvalidWebhookSignature(InvalidWebhookSignatureException e) {
+		log.warn("Webhook refused: {}", e.getMessage());
+		return ErrorResponse.of(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
 	}
 
 	@ExceptionHandler(PaymentGatewayException.class)

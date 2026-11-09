@@ -1,0 +1,15 @@
+# ClusterIP: o acesso externo passa pelo Kong (rotas /api/billing/**).
+# O nome `billing-service` e o upstream configurado no Kong.
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-service
+  namespace: ${namespace}
+spec:
+  type: ClusterIP
+  selector:
+    app: billing-service
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
